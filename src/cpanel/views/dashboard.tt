@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[% page_title %]</title>
+    <link rel="stylesheet" href="assets/css/frame.css">
+</head>
+<body>
+    <div class="frame-container">
+        <header class="frame-header">
+            <h1>Frame Applications</h1>
+            <nav class="frame-nav">
+                <a href="index.live.cgi?action=dashboard" class="active">Dashboard</a>
+                <a href="index.live.cgi?action=apps">My Apps</a>
+                <a href="index.live.cgi?action=deploy">Deploy</a>
+                <a href="index.live.cgi?action=logs">Logs</a>
+            </nav>
+        </header>
+
+        <main class="frame-main">
+            <!-- Instance Status -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Instance Status</h2>
+                    <div class="instance-controls">
+                        [% IF status.status == 'running' %]
+                        <button class="btn btn-warning" onclick="stopInstance()">Stop</button>
+                        <button class="btn btn-info" onclick="restartInstance()">Restart</button>
+                        [% ELSE %]
+                        <button class="btn btn-success" onclick="startInstance()">Start</button>
+                        [% END %]
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="status-label">Status</span>
+                            <span class="status-value [% IF status.status == 'running' %]status-running[% ELSE %]status-stopped[% END %]">
+                                [% status.status | html %]
+                            </span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Port</span>
+                            <span class="status-value">[% status.port %]</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Memory</span>
+                            <span class="status-value">[% status.memory_usage_mb %] MB</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Applications</span>
+                            <span class="status-value">[% app_count %]</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Deploy -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Quick Deploy</h2>
+                </div>
+                <div class="card-body">
+                    <form id="quick-deploy-form" class="inline-form">
+                        <input type="text" id="app-name" name="name" placeholder="Application name" required pattern="[a-z0-9][a-z0-9-]*[a-z0-9]|[a-z0-9]">
+                        <button type="submit" class="btn btn-primary">Create App</button>
+                    </form>
+                    <p class="help-text">Or <a href="index.live.cgi?action=deploy">upload files</a> to deploy an existing application.</p>
+                </div>
+            </div>
+
+            <!-- Applications List -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Your Applications</h2>
+                    <a href="index.live.cgi?action=apps" class="btn btn-secondary">View All</a>
+                </div>
+                <div class="card-body">
+                    [% IF apps.size > 0 %]
+                    <div class="app-grid">
+                        [% FOREACH app IN apps %]
+                        [% IF loop.count <= 6 %]
+                        <div class="app-card">
+                            <div class="app-name">[% app.name | html %]</div>
+                            <div class="app-domain">[% app.domain || 'No domain' | html %]</div>
+                            <div class="app-actions">
+                                <a href="index.live.cgi?action=settings&app=[% app.name | uri %]" class="btn btn-sm btn-secondary">Settings</a>
+                                <button class="btn btn-sm btn-danger" onclick="deleteApp('[% app.name %]')">Delete</button>
+                            </div>
+                        </div>
+                        [% END %]
+                        [% END %]
+                    </div>
+                    [% ELSE %]
+                    <p class="no-data">No applications yet. Create your first app above!</p>
+                    [% END %]
+                </div>
+            </div>
+
+            <!-- Getting Started -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Getting Started</h2>
+                </div>
+                <div class="card-body">
+                    <ol class="getting-started">
+                        <li><strong>Create an application</strong> - Use the quick deploy form above</li>
+                        <li><strong>Upload your code</strong> - Upload .cln or .clean files to your app</li>
+                        <li><strong>Configure domain</strong> - Map a domain or subdomain to your app</li>
+                        <li><strong>Start your instance</strong> - Your app will be live!</li>
+                    </ol>
+                </div>
+            </div>
+        </main>
+
+        <footer class="frame-footer">
+            <p>Frame Applications - Powered by Clean Language</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/frame.js"></script>
+    <script>
+        document.getElementById('quick-deploy-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var name = document.getElementById('app-name').value;
+            deployApp(name);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+# Frame Application Virtual Host Configuration
+# Generated for: [% app_name %]
+# User: [% username %]
+# Domain: [% domain %]
+# Port: [% port %]
+# Generated: [% timestamp %]
+
+<VirtualHost *:80>
+    ServerName [% domain %]
+    [% IF aliases %]
+    ServerAlias [% aliases %]
+    [% END %]
+
+    # Document root (for static files if needed)
+    DocumentRoot /var/frame/instances/[% username %]/apps/[% app_name %]/public
+
+    # Logging
+    ErrorLog /var/log/frame/[% username %]/[% app_name %]-error.log
+    CustomLog /var/log/frame/[% username %]/[% app_name %]-access.log combined
+
+    # Set environment variable for Frame headers
+    SetEnv FRAME_APP 1
+
+    # Proxy configuration
+    ProxyPreserveHost On
+
+    # WebSocket support
+    RewriteEngine On
+    RewriteCond %{HTTP:Upgrade} websocket [NC]
+    RewriteCond %{HTTP:Connection} upgrade [NC]
+    RewriteRule ^/(.*)$ ws://127.0.0.1:[% port %]/$1 [P,L]
+
+    # Proxy all requests to Frame instance
+    ProxyPass / http://127.0.0.1:[% port %]/
+    ProxyPassReverse / http://127.0.0.1:[% port %]/
+
+    # Error pages
+    ErrorDocument 502 /frame-error/502.html
+    ErrorDocument 503 /frame-error/503.html
+    ErrorDocument 504 /frame-error/504.html
+
+    # Health check endpoint bypass (don't log)
+    <Location "/.frame/health">
+        SetEnv nolog
+    </Location>
+
+    # Security - deny access to hidden files
+    <FilesMatch "^\.">
+        Require all denied
+    </FilesMatch>
+
+    # Cache control for static assets
+    <LocationMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
+        Header set Cache-Control "public, max-age=31536000"
+    </LocationMatch>
+</VirtualHost>

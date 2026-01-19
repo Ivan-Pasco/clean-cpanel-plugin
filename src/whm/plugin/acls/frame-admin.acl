@@ -1,0 +1,23 @@
+# Frame Manager WHM ACL
+# This ACL controls access to the Frame Manager feature in WHM
+
+# ACL Name
+name=frame-admin
+
+# Display name shown in WHM ACL Editor
+display_name=Frame Manager Administration
+
+# Description
+description=Allow resellers to manage Frame instances and configuration
+
+# Default state (1=enabled for root, 0=disabled)
+default=0
+
+# Category for grouping
+category=Server Administration
+
+# Root only features
+root_only=0
+
+# Reseller configurable
+reseller_configurable=1

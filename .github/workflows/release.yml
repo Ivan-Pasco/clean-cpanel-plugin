@@ -1,0 +1,207 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-action@stable
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y musl-tools
+
+    - name: Add musl target
+      run: rustup target add x86_64-unknown-linux-musl
+
+    - name: Build release binary (static)
+      run: |
+        cd src/manager
+        cargo build --release --target x86_64-unknown-linux-musl
+
+    - name: Get version
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Create distribution package
+      run: |
+        VERSION=${{ steps.version.outputs.VERSION }}
+        mkdir -p dist/frame-cpanel-${VERSION}
+
+        # Copy binary
+        cp src/manager/target/x86_64-unknown-linux-musl/release/frame-manager dist/frame-cpanel-${VERSION}/
+
+        # Copy source files
+        cp -r src/whm dist/frame-cpanel-${VERSION}/
+        cp -r src/cpanel dist/frame-cpanel-${VERSION}/
+        cp -r src/api dist/frame-cpanel-${VERSION}/
+        cp -r src/hooks dist/frame-cpanel-${VERSION}/
+        cp -r src/apache dist/frame-cpanel-${VERSION}/
+        cp -r packaging dist/frame-cpanel-${VERSION}/
+        cp -r scripts dist/frame-cpanel-${VERSION}/
+
+        # Copy docs
+        cp README.md dist/frame-cpanel-${VERSION}/
+        cp LICENSE dist/frame-cpanel-${VERSION}/
+        cp Makefile dist/frame-cpanel-${VERSION}/
+
+        # Create tarball
+        cd dist
+        tar -czvf frame-cpanel-${VERSION}.tar.gz frame-cpanel-${VERSION}
+
+        # Create checksum
+        sha256sum frame-cpanel-${VERSION}.tar.gz > frame-cpanel-${VERSION}.tar.gz.sha256
+
+    - name: Upload tarball artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: frame-cpanel-tarball
+        path: |
+          dist/frame-cpanel-*.tar.gz
+          dist/frame-cpanel-*.tar.gz.sha256
+
+  build-rpm:
+    runs-on: ubuntu-latest
+    needs: build-linux
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download tarball
+      uses: actions/download-artifact@v4
+      with:
+        name: frame-cpanel-tarball
+        path: dist/
+
+    - name: Install RPM tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y rpm
+
+    - name: Get version
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Build RPM
+      run: |
+        VERSION=${{ steps.version.outputs.VERSION }}
+        mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+
+        # Copy source tarball
+        cp dist/frame-cpanel-${VERSION}.tar.gz ~/rpmbuild/SOURCES/
+
+        # Update spec file version
+        sed "s/%define version.*/%define version ${VERSION}/" packaging/rpm/frame-cpanel.spec > ~/rpmbuild/SPECS/frame-cpanel.spec
+
+        # Build RPM
+        rpmbuild -ba ~/rpmbuild/SPECS/frame-cpanel.spec || echo "RPM build may have issues on non-RHEL system"
+
+        # Copy RPMs if they exist
+        find ~/rpmbuild/RPMS -name "*.rpm" -exec cp {} dist/ \; 2>/dev/null || true
+
+    - name: Upload RPM artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: frame-cpanel-rpm
+        path: dist/*.rpm
+      if: always()
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [build-linux, build-rpm]
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download tarball
+      uses: actions/download-artifact@v4
+      with:
+        name: frame-cpanel-tarball
+        path: dist/
+
+    - name: Download RPM (if available)
+      uses: actions/download-artifact@v4
+      with:
+        name: frame-cpanel-rpm
+        path: dist/
+      continue-on-error: true
+
+    - name: Get version
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Frame cPanel Plugin v${{ steps.version.outputs.VERSION }}
+        body: |
+          ## Frame cPanel Plugin v${{ steps.version.outputs.VERSION }}
+
+          ### Installation
+
+          **Quick Install (recommended):**
+          ```bash
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/quick-install.sh | sudo bash
+          ```
+
+          **Manual Install:**
+          ```bash
+          # Download and extract
+          wget https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.VERSION }}/frame-cpanel-${{ steps.version.outputs.VERSION }}.tar.gz
+          tar -xzf frame-cpanel-${{ steps.version.outputs.VERSION }}.tar.gz
+          cd frame-cpanel-${{ steps.version.outputs.VERSION }}
+
+          # Install
+          sudo ./scripts/install.sh
+          ```
+
+          ### Requirements
+          - cPanel/WHM 102+
+          - CentOS/RHEL 7+ or CloudLinux
+
+          ### Checksums
+          See the `.sha256` file for verification.
+        files: |
+          dist/frame-cpanel-*.tar.gz
+          dist/frame-cpanel-*.tar.gz.sha256
+          dist/*.rpm
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-latest:
+    runs-on: ubuntu-latest
+    needs: create-release
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Get version
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Update latest version file
+      run: |
+        echo "${{ steps.version.outputs.VERSION }}" > LATEST_VERSION
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add LATEST_VERSION
+        git commit -m "Update LATEST_VERSION to ${{ steps.version.outputs.VERSION }}" || true
+        git push || true

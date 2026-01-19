@@ -1,0 +1,47 @@
+# Rust build artifacts
+/target/
+src/manager/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build artifacts
+/dist/
+*.tar.gz
+*.rpm
+*.deb
+
+# RPM build
+~/rpmbuild/
+
+# Test artifacts
+/tests/output/
+/tests/*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Log files
+*.log
+
+# Local development
+.env
+.env.local
+*.local.conf

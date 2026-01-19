@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[% page_title %] - WHM</title>
+    <link rel="stylesheet" href="assets/css/frame.css">
+</head>
+<body>
+    <div class="frame-container">
+        <header class="frame-header">
+            <h1>Frame Server Management</h1>
+            <nav class="frame-nav">
+                <a href="index.cgi?action=dashboard" class="[% IF action == 'dashboard' %]active[% END %]">Dashboard</a>
+                <a href="index.cgi?action=instances" class="[% IF action == 'instances' %]active[% END %]">Instances</a>
+                <a href="index.cgi?action=settings" class="[% IF action == 'settings' %]active[% END %]">Settings</a>
+            </nav>
+        </header>
+
+        <main class="frame-main">
+            <!-- Service Status Card -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Service Status</h2>
+                    <button class="btn btn-primary" onclick="restartService()">Restart Service</button>
+                </div>
+                <div class="card-body">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="status-label">Status</span>
+                            <span class="status-value [% IF status.service_status == 'running' %]status-running[% ELSE %]status-stopped[% END %]">
+                                [% status.service_status | html %]
+                            </span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Active Instances</span>
+                            <span class="status-value">[% running_count %] / [% total_count %]</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Memory Usage</span>
+                            <span class="status-value">[% status.memory_usage_mb %] MB</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Port Range</span>
+                            <span class="status-value">[% status.port_range | html %]</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Instances Card -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Active Instances</h2>
+                    <a href="index.cgi?action=instances" class="btn btn-secondary">View All</a>
+                </div>
+                <div class="card-body">
+                    [% IF instances.size > 0 %]
+                    <table class="frame-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Port</th>
+                                <th>Memory</th>
+                                <th>CPU</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            [% FOREACH instance IN instances %]
+                            [% IF loop.count <= 10 %]
+                            <tr>
+                                <td>[% instance.username | html %]</td>
+                                <td>[% instance.port %]</td>
+                                <td>[% instance.memory_usage_mb %] MB</td>
+                                <td>[% instance.cpu_usage | format('%.1f') %]%</td>
+                                <td>
+                                    <span class="status-badge [% IF instance.status == 'running' %]badge-success[% ELSE %]badge-warning[% END %]">
+                                        [% instance.status | html %]
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    [% IF instance.status == 'running' %]
+                                    <button class="btn btn-sm btn-warning" onclick="stopInstance('[% instance.username %]')">Stop</button>
+                                    <button class="btn btn-sm btn-info" onclick="restartInstance('[% instance.username %]')">Restart</button>
+                                    [% ELSE %]
+                                    <button class="btn btn-sm btn-success" onclick="startInstance('[% instance.username %]')">Start</button>
+                                    [% END %]
+                                    <button class="btn btn-sm btn-secondary" onclick="viewLogs('[% instance.username %]')">Logs</button>
+                                </td>
+                            </tr>
+                            [% END %]
+                            [% END %]
+                        </tbody>
+                    </table>
+                    [% ELSE %]
+                    <p class="no-data">No instances found.</p>
+                    [% END %]
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="action-buttons">
+                        <button class="btn btn-success" onclick="startAllInstances()">Start All Instances</button>
+                        <button class="btn btn-warning" onclick="stopAllInstances()">Stop All Instances</button>
+                        <a href="index.cgi?action=logs" class="btn btn-secondary">View Service Logs</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="frame-footer">
+            <p>Frame cPanel Plugin v1.0.0</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/frame.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+#!/bin/bash
+# Frame cPanel Plugin - Pre Account Removal Hook
+# Called before a cPanel account is removed
+#
+# This script:
+# 1. Stops the user's Frame instance
+# 2. Releases the allocated port
+#
+# Note: Directory cleanup happens in postacctremove
+
+set -e
+
+# Get username from arguments
+USERNAME="$1"
+
+if [ -z "$USERNAME" ]; then
+    echo "Error: Username not provided" >&2
+    exit 1
+fi
+
+# Configuration
+FRAME_MANAGER="/usr/local/cpanel/3rdparty/bin/frame-manager"
+INSTANCE_DIR="/var/frame/instances/$USERNAME"
+
+# Check if user has a Frame instance
+if [ ! -d "$INSTANCE_DIR" ]; then
+    echo "No Frame instance found for $USERNAME, skipping"
+    exit 0
+fi
+
+echo "Preparing to remove Frame instance for user: $USERNAME"
+
+# Stop the user's Frame instance
+if [ -x "$FRAME_MANAGER" ]; then
+    echo "Stopping Frame instance..."
+    $FRAME_MANAGER user stop "$USERNAME" 2>/dev/null || true
+
+    # Wait a moment for the process to stop
+    sleep 1
+
+    # Release the allocated port
+    echo "Releasing port allocation..."
+    $FRAME_MANAGER port release "$USERNAME" 2>/dev/null || true
+fi
+
+echo "Frame instance prepared for removal: $USERNAME"
+exit 0

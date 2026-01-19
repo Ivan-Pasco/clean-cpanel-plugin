@@ -1,0 +1,33 @@
+# Frame Application Path-Based Proxy Configuration
+# For apps accessed via /frame/[app_name]/ on the user's main domain
+#
+# Generated for: [% app_name %]
+# User: [% username %]
+# Port: [% port %]
+# Generated: [% timestamp %]
+
+# This configuration is included in the user's main domain vhost
+# Add to user's vhost: Include /etc/apache2/conf.d/frame/[% username %]/[% app_name %]-path.conf
+
+# Proxy rules for path-based access
+<Location "/frame/[% app_name %]">
+    # Set environment variable for Frame headers
+    SetEnv FRAME_APP 1
+
+    ProxyPreserveHost On
+    ProxyPass http://127.0.0.1:[% port %]/
+    ProxyPassReverse http://127.0.0.1:[% port %]/
+
+    # Pass original path info
+    RequestHeader set X-Frame-App "[% app_name %]"
+    RequestHeader set X-Frame-User "[% username %]"
+    RequestHeader set X-Original-URI %{REQUEST_URI}e
+</Location>
+
+# WebSocket support for path-based access
+<LocationMatch "^/frame/[% app_name %]/ws">
+    RewriteEngine On
+    RewriteCond %{HTTP:Upgrade} websocket [NC]
+    RewriteCond %{HTTP:Connection} upgrade [NC]
+    RewriteRule ^/frame/[% app_name %]/(.*)$ ws://127.0.0.1:[% port %]/$1 [P,L]
+</LocationMatch>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[% page_title %]</title>
+    <link rel="stylesheet" href="assets/css/frame.css">
+</head>
+<body>
+    <div class="frame-container">
+        <header class="frame-header">
+            <h1>Frame Applications</h1>
+            <nav class="frame-nav">
+                <a href="index.live.cgi?action=dashboard">Dashboard</a>
+                <a href="index.live.cgi?action=apps" class="active">My Apps</a>
+                <a href="index.live.cgi?action=deploy">Deploy</a>
+                <a href="index.live.cgi?action=logs">Logs</a>
+            </nav>
+        </header>
+
+        <main class="frame-main">
+            <!-- Apps Header -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>My Applications ([% apps.size %])</h2>
+                    <a href="index.live.cgi?action=deploy" class="btn btn-primary">Deploy New App</a>
+                </div>
+                <div class="card-body">
+                    <input type="text" id="app-search" placeholder="Search applications..." onkeyup="filterApps()">
+                </div>
+            </div>
+
+            <!-- Apps Grid -->
+            [% IF apps.size > 0 %]
+            <div class="apps-container" id="apps-container">
+                [% FOREACH app IN apps %]
+                <div class="frame-card app-item" data-name="[% app.name | html %]">
+                    <div class="card-header">
+                        <h3>[% app.name | html %]</h3>
+                        <span class="status-badge badge-success">Active</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="app-info">
+                            <div class="info-row">
+                                <span class="info-label">Domain:</span>
+                                <span class="info-value">[% app.domain || 'Not configured' | html %]</span>
+                            </div>
+                            [% IF app.created_at %]
+                            <div class="info-row">
+                                <span class="info-label">Created:</span>
+                                <span class="info-value" data-timestamp="[% app.created_at %]">[% app.created_at %]</span>
+                            </div>
+                            [% END %]
+                        </div>
+                        <div class="app-actions">
+                            [% IF app.domain %]
+                            <a href="https://[% app.domain %]" target="_blank" class="btn btn-sm btn-success">Open</a>
+                            [% END %]
+                            <a href="index.live.cgi?action=settings&app=[% app.name | uri %]" class="btn btn-sm btn-secondary">Settings</a>
+                            <a href="index.live.cgi?action=logs&app=[% app.name | uri %]" class="btn btn-sm btn-info">Logs</a>
+                            <button class="btn btn-sm btn-danger" onclick="deleteApp('[% app.name %]')">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                [% END %]
+            </div>
+            [% ELSE %]
+            <div class="frame-card">
+                <div class="card-body">
+                    <div class="empty-state">
+                        <h3>No Applications Yet</h3>
+                        <p>Create your first Frame application to get started.</p>
+                        <a href="index.live.cgi?action=deploy" class="btn btn-primary">Deploy Your First App</a>
+                    </div>
+                </div>
+            </div>
+            [% END %]
+        </main>
+
+        <footer class="frame-footer">
+            <p>Frame Applications - Powered by Clean Language</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/frame.js"></script>
+    <script>
+        function filterApps() {
+            var search = document.getElementById('app-search').value.toLowerCase();
+            var apps = document.querySelectorAll('.app-item');
+
+            apps.forEach(function(app) {
+                var name = app.getAttribute('data-name').toLowerCase();
+                app.style.display = name.includes(search) ? '' : 'none';
+            });
+        }
+
+        // Format timestamps
+        document.querySelectorAll('[data-timestamp]').forEach(function(el) {
+            var ts = parseInt(el.getAttribute('data-timestamp'));
+            if (ts) {
+                el.textContent = new Date(ts * 1000).toLocaleDateString();
+            }
+        });
+    </script>
+</body>
+</html>

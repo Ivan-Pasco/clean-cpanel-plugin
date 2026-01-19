@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[% page_title %] - WHM</title>
+    <link rel="stylesheet" href="assets/css/frame.css">
+</head>
+<body>
+    <div class="frame-container">
+        <header class="frame-header">
+            <h1>Frame Server Management</h1>
+            <nav class="frame-nav">
+                <a href="index.cgi?action=dashboard">Dashboard</a>
+                <a href="index.cgi?action=instances" class="active">Instances</a>
+                <a href="index.cgi?action=settings">Settings</a>
+            </nav>
+        </header>
+
+        <main class="frame-main">
+            <!-- Filter Bar -->
+            <div class="frame-card">
+                <div class="card-body">
+                    <div class="filter-bar">
+                        <input type="text" id="search-input" placeholder="Search by username..." onkeyup="filterInstances()">
+                        <select id="status-filter" onchange="filterInstances()">
+                            <option value="">All Statuses</option>
+                            <option value="running">Running</option>
+                            <option value="stopped">Stopped</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="refreshInstances()">Refresh</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instances Table -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>All Instances ([% instances.size %])</h2>
+                    <div class="bulk-actions">
+                        <button class="btn btn-success btn-sm" onclick="startAllInstances()">Start All</button>
+                        <button class="btn btn-warning btn-sm" onclick="stopAllInstances()">Stop All</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    [% IF instances.size > 0 %]
+                    <table class="frame-table" id="instances-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Port</th>
+                                <th>Memory</th>
+                                <th>CPU</th>
+                                <th>Apps</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            [% FOREACH instance IN instances %]
+                            <tr data-username="[% instance.username | html %]" data-status="[% instance.status %]">
+                                <td>
+                                    <strong>[% instance.username | html %]</strong>
+                                </td>
+                                <td>[% instance.port %]</td>
+                                <td>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: [% instance.memory_usage_mb / 512 * 100 %]%"></div>
+                                    </div>
+                                    <small>[% instance.memory_usage_mb %] MB</small>
+                                </td>
+                                <td>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar [% IF instance.cpu_usage > 80 %]progress-warning[% END %]" style="width: [% instance.cpu_usage %]%"></div>
+                                    </div>
+                                    <small>[% instance.cpu_usage | format('%.1f') %]%</small>
+                                </td>
+                                <td>[% instance.app_count %]</td>
+                                <td>
+                                    <span class="status-badge [% IF instance.status == 'running' %]badge-success[% ELSIF instance.status == 'stopped' %]badge-secondary[% ELSE %]badge-warning[% END %]">
+                                        [% instance.status | html %]
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    [% IF instance.status == 'running' %]
+                                    <button class="btn btn-sm btn-warning" onclick="stopInstance('[% instance.username %]')" title="Stop">
+                                        Stop
+                                    </button>
+                                    <button class="btn btn-sm btn-info" onclick="restartInstance('[% instance.username %]')" title="Restart">
+                                        Restart
+                                    </button>
+                                    [% ELSE %]
+                                    <button class="btn btn-sm btn-success" onclick="startInstance('[% instance.username %]')" title="Start">
+                                        Start
+                                    </button>
+                                    [% END %]
+                                    <button class="btn btn-sm btn-secondary" onclick="viewLogs('[% instance.username %]')" title="View Logs">
+                                        Logs
+                                    </button>
+                                </td>
+                            </tr>
+                            [% END %]
+                        </tbody>
+                    </table>
+                    [% ELSE %]
+                    <p class="no-data">No Frame instances found.</p>
+                    <p><small>Instances are created automatically when cPanel accounts are created (if Frame is enabled).</small></p>
+                    [% END %]
+                </div>
+            </div>
+        </main>
+
+        <footer class="frame-footer">
+            <p>Frame cPanel Plugin v1.0.0</p>
+        </footer>
+    </div>
+
+    <!-- Log Modal -->
+    <div id="log-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Instance Logs: <span id="log-username"></span></h3>
+                <button class="modal-close" onclick="closeLogModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="log-content"></pre>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeLogModal()">Close</button>
+                <button class="btn btn-primary" onclick="refreshLogs()">Refresh</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/frame.js"></script>
+    <script>
+        function filterInstances() {
+            var search = document.getElementById('search-input').value.toLowerCase();
+            var status = document.getElementById('status-filter').value;
+            var rows = document.querySelectorAll('#instances-table tbody tr');
+
+            rows.forEach(function(row) {
+                var username = row.getAttribute('data-username').toLowerCase();
+                var rowStatus = row.getAttribute('data-status');
+                var matchSearch = username.includes(search);
+                var matchStatus = !status || rowStatus === status;
+                row.style.display = matchSearch && matchStatus ? '' : 'none';
+            });
+        }
+
+        function refreshInstances() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+    "id": "frame_manager",
+    "name": "Frame Manager",
+    "version": "1.0.0",
+    "description": "Manage Frame application hosting for all cPanel accounts",
+    "url": "cgi/frame/index.cgi",
+    "icon": "frame.svg",
+    "group": {
+        "id": "plugins",
+        "name": "Plugins",
+        "order": 100
+    },
+    "acls": ["all"],
+    "menu": [
+        {
+            "id": "frame_dashboard",
+            "name": "Dashboard",
+            "url": "cgi/frame/index.cgi?view=dashboard",
+            "order": 1
+        },
+        {
+            "id": "frame_instances",
+            "name": "User Instances",
+            "url": "cgi/frame/index.cgi?view=instances",
+            "order": 2
+        },
+        {
+            "id": "frame_settings",
+            "name": "Settings",
+            "url": "cgi/frame/index.cgi?view=settings",
+            "order": 3
+        },
+        {
+            "id": "frame_logs",
+            "name": "System Logs",
+            "url": "cgi/frame/index.cgi?view=logs",
+            "order": 4
+        }
+    ],
+    "searchterms": [
+        "frame",
+        "clean",
+        "wasm",
+        "webassembly",
+        "application",
+        "deploy"
+    ]
+}

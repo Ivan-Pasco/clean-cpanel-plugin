@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[% page_title %]</title>
+    <link rel="stylesheet" href="assets/css/frame.css">
+</head>
+<body>
+    <div class="frame-container">
+        <header class="frame-header">
+            <h1>Frame Applications</h1>
+            <nav class="frame-nav">
+                <a href="index.live.cgi?action=dashboard">Dashboard</a>
+                <a href="index.live.cgi?action=apps">My Apps</a>
+                <a href="index.live.cgi?action=deploy" class="active">Deploy</a>
+                <a href="index.live.cgi?action=logs">Logs</a>
+            </nav>
+        </header>
+
+        <main class="frame-main">
+            <!-- Create New App -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Create New Application</h2>
+                </div>
+                <div class="card-body">
+                    <form id="create-app-form" class="frame-form">
+                        <div class="form-group">
+                            <label for="app-name">Application Name</label>
+                            <input type="text" id="app-name" name="name" required
+                                   pattern="[a-z0-9][a-z0-9-]*[a-z0-9]|[a-z0-9]"
+                                   placeholder="my-app">
+                            <small>Use lowercase letters, numbers, and hyphens only</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="app-domain">Domain (Optional)</label>
+                            <input type="text" id="app-domain" name="domain"
+                                   placeholder="myapp.example.com">
+                            <small>You can configure this later in settings</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Create Application</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Upload Files -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Upload Files</h2>
+                </div>
+                <div class="card-body">
+                    <form id="upload-form" class="frame-form" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="upload-app">Select Application</label>
+                            <select id="upload-app" name="app" required>
+                                <option value="">-- Select Application --</option>
+                                [% FOREACH app IN apps %]
+                                <option value="[% app.name | html %]">[% app.name | html %]</option>
+                                [% END %]
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="upload-file">Select Files</label>
+                            <div class="file-upload-area" id="drop-zone">
+                                <input type="file" id="upload-file" name="file" accept=".cln,.clean" multiple>
+                                <p>Drag and drop files here or click to select</p>
+                                <small>Accepted formats: .cln, .clean</small>
+                            </div>
+                        </div>
+
+                        <div id="file-list" class="file-list"></div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="upload-btn" disabled>Upload Files</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Git Deploy (Future) -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Git Repository</h2>
+                    <span class="badge badge-secondary">Coming Soon</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Deploy directly from a Git repository. This feature is coming in a future update.</p>
+                    <div class="form-group">
+                        <label for="git-url">Repository URL</label>
+                        <input type="text" id="git-url" placeholder="https://github.com/user/repo.git" disabled>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="frame-footer">
+            <p>Frame Applications - Powered by Clean Language</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/frame.js"></script>
+    <script src="assets/js/deploy.js"></script>
+</body>
+</html>

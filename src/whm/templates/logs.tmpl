@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[% page_title %] - WHM</title>
+    <link rel="stylesheet" href="assets/css/frame.css">
+</head>
+<body>
+    <div class="frame-container">
+        <header class="frame-header">
+            <h1>Frame Server Management</h1>
+            <nav class="frame-nav">
+                <a href="index.cgi?action=dashboard">Dashboard</a>
+                <a href="index.cgi?action=instances">Instances</a>
+                <a href="index.cgi?action=settings">Settings</a>
+            </nav>
+        </header>
+
+        <main class="frame-main">
+            <!-- Log Viewer -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>[% IF username %]Logs: [% username | html %][% ELSE %]Service Logs[% END %]</h2>
+                    <div class="log-controls">
+                        [% IF username %]
+                        <a href="index.cgi?action=logs" class="btn btn-secondary">View Service Logs</a>
+                        [% END %]
+                        <button class="btn btn-primary" onclick="refreshPage()">Refresh</button>
+                        <button class="btn btn-secondary" onclick="downloadLogs()">Download</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="log-filters">
+                        <input type="text" id="log-search" placeholder="Filter logs..." onkeyup="filterLogs()">
+                        <select id="log-level" onchange="filterLogs()">
+                            <option value="">All Levels</option>
+                            <option value="ERROR">Error</option>
+                            <option value="WARN">Warning</option>
+                            <option value="INFO">Info</option>
+                            <option value="DEBUG">Debug</option>
+                        </select>
+                    </div>
+                    <div class="log-viewer" id="log-viewer">
+                        [% IF logs.size > 0 %]
+                        [% FOREACH line IN logs %]
+                        <div class="log-line [% IF line.match('ERROR') %]log-error[% ELSIF line.match('WARN') %]log-warn[% ELSIF line.match('DEBUG') %]log-debug[% END %]">[% line | html %]</div>
+                        [% END %]
+                        [% ELSE %]
+                        <p class="no-data">No logs available.</p>
+                        [% END %]
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Navigation -->
+            [% IF username %]
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Instance: [% username | html %]</h2>
+                </div>
+                <div class="card-body">
+                    <div class="action-buttons">
+                        <button class="btn btn-success" onclick="startInstance('[% username %]')">Start</button>
+                        <button class="btn btn-warning" onclick="stopInstance('[% username %]')">Stop</button>
+                        <button class="btn btn-info" onclick="restartInstance('[% username %]')">Restart</button>
+                        <a href="index.cgi?action=instances" class="btn btn-secondary">Back to Instances</a>
+                    </div>
+                </div>
+            </div>
+            [% END %]
+        </main>
+
+        <footer class="frame-footer">
+            <p>Frame cPanel Plugin v1.0.0</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/frame.js"></script>
+    <script>
+        function filterLogs() {
+            var search = document.getElementById('log-search').value.toLowerCase();
+            var level = document.getElementById('log-level').value;
+            var lines = document.querySelectorAll('.log-line');
+
+            lines.forEach(function(line) {
+                var text = line.textContent.toLowerCase();
+                var matchSearch = text.includes(search);
+                var matchLevel = !level || text.includes(level.toLowerCase());
+                line.style.display = matchSearch && matchLevel ? '' : 'none';
+            });
+        }
+
+        function refreshPage() {
+            location.reload();
+        }
+
+        function downloadLogs() {
+            var logs = document.getElementById('log-viewer').innerText;
+            var blob = new Blob([logs], { type: 'text/plain' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'frame-logs-[% username || "service" %].txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-scroll to bottom
+        var logViewer = document.getElementById('log-viewer');
+        logViewer.scrollTop = logViewer.scrollHeight;
+    </script>
+</body>
+</html>

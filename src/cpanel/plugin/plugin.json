@@ -1,0 +1,32 @@
+{
+    "id": "frame_applications",
+    "name": "Frame Applications",
+    "version": "1.0.0",
+    "description": "Deploy and manage Clean Language/Frame applications",
+    "homepage": "https://cleanlanguage.dev",
+    "author": {
+        "name": "Clean Language Team",
+        "url": "https://cleanlanguage.dev"
+    },
+    "features": [
+        {
+            "id": "frame",
+            "type": "link",
+            "name": "Frame Applications",
+            "description": "Manage your Frame applications",
+            "group": {
+                "id": "applications",
+                "name": "Applications",
+                "order": 50
+            },
+            "icon": "frame-icon.svg",
+            "url": "frame/index.live.cgi",
+            "acls": ["frame-apps"],
+            "if": "feature:frame"
+        }
+    ],
+    "engine": {
+        "cpanel": ">=11.102"
+    },
+    "license": "MIT"
+}

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[% page_title %]</title>
+    <link rel="stylesheet" href="assets/css/frame.css">
+</head>
+<body>
+    <div class="frame-container">
+        <header class="frame-header">
+            <h1>Frame Applications</h1>
+            <nav class="frame-nav">
+                <a href="index.live.cgi?action=dashboard">Dashboard</a>
+                <a href="index.live.cgi?action=apps">My Apps</a>
+                <a href="index.live.cgi?action=deploy">Deploy</a>
+                <a href="index.live.cgi?action=logs">Logs</a>
+            </nav>
+        </header>
+
+        <main class="frame-main">
+            <!-- App Header -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>[% app.name | html %]</h2>
+                    <div class="app-header-actions">
+                        <a href="index.live.cgi?action=logs&app=[% app.name | uri %]" class="btn btn-info">View Logs</a>
+                        <button class="btn btn-danger" onclick="deleteApp('[% app.name %]')">Delete App</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Domain Settings -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Domain Configuration</h2>
+                </div>
+                <div class="card-body">
+                    <form id="domain-form" class="frame-form">
+                        <input type="hidden" name="app" value="[% app.name | html %]">
+
+                        <div class="form-group">
+                            <label for="domain">Domain / Subdomain</label>
+                            <input type="text" id="domain" name="domain"
+                                   value="[% app.domain | html %]"
+                                   placeholder="myapp.example.com">
+                            <small>Enter the domain or subdomain to use for this application</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Domain</button>
+                        </div>
+                    </form>
+
+                    [% IF app.domain %]
+                    <div class="domain-info">
+                        <h4>Access URLs</h4>
+                        <p><strong>Primary:</strong> <a href="https://[% app.domain %]" target="_blank">https://[% app.domain %]</a></p>
+                        <p><strong>Frame URL:</strong> /frame/[% app.name | html %]/</p>
+                    </div>
+                    [% END %]
+                </div>
+            </div>
+
+            <!-- Environment Variables -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Environment Variables</h2>
+                </div>
+                <div class="card-body">
+                    <div class="env-list" id="env-list">
+                        [% FOREACH key IN env.keys.sort %]
+                        <div class="env-item" data-key="[% key | html %]">
+                            <span class="env-key">[% key | html %]</span>
+                            <span class="env-value">[% env.$key | html %]</span>
+                            <button class="btn btn-sm btn-danger" onclick="removeEnvVar('[% key | html %]')">Remove</button>
+                        </div>
+                        [% END %]
+                    </div>
+
+                    <form id="env-form" class="inline-form">
+                        <input type="text" id="env-key" name="key" placeholder="KEY" required pattern="[A-Z_][A-Z0-9_]*">
+                        <input type="text" id="env-value" name="value" placeholder="value" required>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+                    <small>Environment variable names should be UPPERCASE with underscores</small>
+                </div>
+            </div>
+
+            <!-- Database Connection (Future) -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Database Connection</h2>
+                    <span class="badge badge-secondary">Coming Soon</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Configure database connections for your application. This feature is coming in a future update.</p>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="frame-card danger-zone">
+                <div class="card-header">
+                    <h2>Danger Zone</h2>
+                </div>
+                <div class="card-body">
+                    <div class="danger-action">
+                        <div>
+                            <strong>Delete Application</strong>
+                            <p>Once deleted, all data for this application will be permanently removed.</p>
+                        </div>
+                        <button class="btn btn-danger" onclick="confirmDelete('[% app.name %]')">Delete Application</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="frame-footer">
+            <p>Frame Applications - Powered by Clean Language</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/frame.js"></script>
+    <script>
+        var currentApp = '[% app.name | html %]';
+
+        document.getElementById('domain-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            updateDomain(currentApp, document.getElementById('domain').value);
+        });
+
+        document.getElementById('env-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var key = document.getElementById('env-key').value;
+            var value = document.getElementById('env-value').value;
+            addEnvVar(key, value);
+            document.getElementById('env-key').value = '';
+            document.getElementById('env-value').value = '';
+        });
+
+        function confirmDelete(appName) {
+            if (confirm('Are you sure you want to delete "' + appName + '"? This action cannot be undone.')) {
+                deleteApp(appName, function() {
+                    window.location.href = 'index.live.cgi?action=apps';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

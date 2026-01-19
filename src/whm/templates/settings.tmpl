@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[% page_title %] - WHM</title>
+    <link rel="stylesheet" href="assets/css/frame.css">
+</head>
+<body>
+    <div class="frame-container">
+        <header class="frame-header">
+            <h1>Frame Server Management</h1>
+            <nav class="frame-nav">
+                <a href="index.cgi?action=dashboard">Dashboard</a>
+                <a href="index.cgi?action=instances">Instances</a>
+                <a href="index.cgi?action=settings" class="active">Settings</a>
+            </nav>
+        </header>
+
+        <main class="frame-main">
+            <!-- Global Settings -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Global Settings</h2>
+                </div>
+                <div class="card-body">
+                    <form id="settings-form" class="frame-form">
+                        <div class="form-group">
+                            <label for="enabled">Frame Service</label>
+                            <select id="enabled" name="enabled">
+                                <option value="true" [% IF settings.service.enabled %]selected[% END %]>Enabled</option>
+                                <option value="false" [% UNLESS settings.service.enabled %]selected[% END %]>Disabled</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="auto_start">Auto-Start on Boot</label>
+                            <select id="auto_start" name="auto_start">
+                                <option value="true" [% IF settings.service.auto_start %]selected[% END %]>Yes</option>
+                                <option value="false" [% UNLESS settings.service.auto_start %]selected[% END %]>No</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="health_check_interval">Health Check Interval (seconds)</label>
+                            <input type="number" id="health_check_interval" name="health_check_interval"
+                                   value="[% settings.service.health_check_interval || 30 %]" min="10" max="300">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Port Range</label>
+                            <input type="text" value="[% settings.service.port_range_start %] - [% settings.service.port_range_end %]" disabled>
+                            <small>Port range can only be changed in /etc/frame/frame.conf</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Default Limits -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Default Resource Limits</h2>
+                </div>
+                <div class="card-body">
+                    <table class="frame-table">
+                        <tr>
+                            <th>Memory Limit</th>
+                            <td>[% settings.defaults.memory_limit || 512 %] MB</td>
+                        </tr>
+                        <tr>
+                            <th>CPU Limit</th>
+                            <td>[% settings.defaults.cpu_limit || 25 %]%</td>
+                        </tr>
+                        <tr>
+                            <th>Max Apps per User</th>
+                            <td>[% settings.defaults.max_apps || 5 %]</td>
+                        </tr>
+                        <tr>
+                            <th>Disk Quota</th>
+                            <td>[% settings.defaults.disk_quota || 1024 %] MB</td>
+                        </tr>
+                    </table>
+                    <small>Default limits can be changed in /etc/frame/limits.conf</small>
+                </div>
+            </div>
+
+            <!-- Package Configurations -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Package Configurations</h2>
+                </div>
+                <div class="card-body">
+                    [% IF packages.size > 0 %]
+                    <table class="frame-table">
+                        <thead>
+                            <tr>
+                                <th>Package Name</th>
+                                <th>Memory Limit</th>
+                                <th>CPU Limit</th>
+                                <th>Max Apps</th>
+                                <th>Disk Quota</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            [% FOREACH pkg IN packages %]
+                            <tr>
+                                <td>[% pkg.name | html %]</td>
+                                <td>[% pkg.limits.memory_limit %] MB</td>
+                                <td>[% pkg.limits.cpu_limit %]%</td>
+                                <td>[% pkg.limits.max_apps %]</td>
+                                <td>[% pkg.limits.disk_quota %] MB</td>
+                                <td>
+                                    <button class="btn btn-sm btn-secondary" onclick="editPackage('[% pkg.name %]')">Edit</button>
+                                </td>
+                            </tr>
+                            [% END %]
+                        </tbody>
+                    </table>
+                    [% ELSE %]
+                    <p class="no-data">No package configurations found.</p>
+                    <p><small>Create package configs in /etc/frame/packages/</small></p>
+                    [% END %]
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Security Settings</h2>
+                </div>
+                <div class="card-body">
+                    <table class="frame-table">
+                        <tr>
+                            <th>Filesystem Access</th>
+                            <td>
+                                <span class="status-badge [% IF settings.security.allow_fs_access %]badge-warning[% ELSE %]badge-success[% END %]">
+                                    [% IF settings.security.allow_fs_access %]Allowed[% ELSE %]Denied[% END %]
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>System Access</th>
+                            <td>
+                                <span class="status-badge [% IF settings.security.allow_sys_access %]badge-warning[% ELSE %]badge-success[% END %]">
+                                    [% IF settings.security.allow_sys_access %]Allowed[% ELSE %]Denied[% END %]
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Require HTTPS</th>
+                            <td>
+                                <span class="status-badge [% IF settings.security.require_https %]badge-success[% ELSE %]badge-warning[% END %]">
+                                    [% IF settings.security.require_https %]Yes[% ELSE %]No[% END %]
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                    <small>Security settings can be changed in /etc/frame/frame.conf</small>
+                </div>
+            </div>
+        </main>
+
+        <footer class="frame-footer">
+            <p>Frame cPanel Plugin v1.0.0</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/frame.js"></script>
+    <script>
+        document.getElementById('settings-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            updateSettings(new FormData(this));
+        });
+    </script>
+</body>
+</html>

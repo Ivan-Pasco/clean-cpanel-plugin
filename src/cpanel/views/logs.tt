@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[% page_title %]</title>
+    <link rel="stylesheet" href="assets/css/frame.css">
+</head>
+<body>
+    <div class="frame-container">
+        <header class="frame-header">
+            <h1>Frame Applications</h1>
+            <nav class="frame-nav">
+                <a href="index.live.cgi?action=dashboard">Dashboard</a>
+                <a href="index.live.cgi?action=apps">My Apps</a>
+                <a href="index.live.cgi?action=deploy">Deploy</a>
+                <a href="index.live.cgi?action=logs" class="active">Logs</a>
+            </nav>
+        </header>
+
+        <main class="frame-main">
+            <!-- Log Controls -->
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>[% IF app_name %]Application Logs: [% app_name | html %][% ELSE %]Instance Logs[% END %]</h2>
+                    <div class="log-controls">
+                        <button class="btn btn-primary" onclick="refreshLogs()">Refresh</button>
+                        <button class="btn btn-secondary" onclick="downloadLogs()">Download</button>
+                        <label class="auto-refresh">
+                            <input type="checkbox" id="auto-refresh"> Auto-refresh
+                        </label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="log-filters">
+                        <input type="text" id="log-search" placeholder="Filter logs..." onkeyup="filterLogs()">
+                        <select id="log-level" onchange="filterLogs()">
+                            <option value="">All Levels</option>
+                            <option value="ERROR">Errors</option>
+                            <option value="WARN">Warnings</option>
+                            <option value="INFO">Info</option>
+                            <option value="DEBUG">Debug</option>
+                        </select>
+                        [% IF app_name %]
+                        <a href="index.live.cgi?action=logs" class="btn btn-sm btn-secondary">View Instance Logs</a>
+                        [% END %]
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Viewer -->
+            <div class="frame-card">
+                <div class="card-body log-card-body">
+                    <div class="log-viewer" id="log-viewer">
+                        [% IF logs.size > 0 %]
+                        [% FOREACH line IN logs %]
+                        <div class="log-line [% IF line.match('ERROR') %]log-error[% ELSIF line.match('WARN') %]log-warn[% ELSIF line.match('DEBUG') %]log-debug[% END %]">[% line | html %]</div>
+                        [% END %]
+                        [% ELSE %]
+                        <p class="no-data">No logs available.</p>
+                        [% END %]
+                    </div>
+                </div>
+            </div>
+
+            <!-- App Log Links -->
+            [% UNLESS app_name %]
+            <div class="frame-card">
+                <div class="card-header">
+                    <h2>Application Logs</h2>
+                </div>
+                <div class="card-body">
+                    [% IF apps.size > 0 %]
+                    <div class="app-log-links">
+                        [% FOREACH app IN apps %]
+                        <a href="index.live.cgi?action=logs&app=[% app.name | uri %]" class="btn btn-secondary">[% app.name | html %]</a>
+                        [% END %]
+                    </div>
+                    [% ELSE %]
+                    <p class="no-data">No applications to show logs for.</p>
+                    [% END %]
+                </div>
+            </div>
+            [% END %]
+        </main>
+
+        <footer class="frame-footer">
+            <p>Frame Applications - Powered by Clean Language</p>
+        </footer>
+    </div>
+
+    <script src="assets/js/frame.js"></script>
+    <script src="assets/js/logs.js"></script>
+    <script>
+        var currentApp = '[% app_name | html %]';
+
+        // Auto-scroll to bottom on load
+        var logViewer = document.getElementById('log-viewer');
+        logViewer.scrollTop = logViewer.scrollHeight;
+    </script>
+</body>
+</html>

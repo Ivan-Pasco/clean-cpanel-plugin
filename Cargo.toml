@@ -1,0 +1,33 @@
+[workspace]
+members = ["src/manager"]
+resolver = "2"
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+authors = ["Clean Language Project"]
+license = "MIT"
+repository = "https://github.com/cleanlanguage/clean-cpanel-plugin"
+description = "Frame cPanel Plugin - Clean Language application hosting for cPanel/WHM"
+
+[workspace.dependencies]
+tokio = { version = "1.40", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+axum = "0.7"
+clap = { version = "4.5", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+thiserror = "1.0"
+anyhow = "1.0"
+nix = { version = "0.29", features = ["process", "signal", "user"] }
+configparser = "3.0"
+chrono = { version = "0.4", features = ["serde"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+uuid = { version = "1.10", features = ["v4", "serde"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

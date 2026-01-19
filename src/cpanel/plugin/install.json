@@ -1,0 +1,212 @@
+{
+    "name": "Frame Applications",
+    "version": "1.0.0",
+    "targets": {
+        "cpanel": {
+            "base_modules": [
+                {
+                    "source": "src/cpanel/index.live.cgi",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/index.live.cgi",
+                    "mode": "0755"
+                },
+                {
+                    "source": "src/cpanel/api.live.cgi",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/api.live.cgi",
+                    "mode": "0755"
+                }
+            ],
+            "templates": [
+                {
+                    "source": "src/cpanel/views/dashboard.tt",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/views/dashboard.tt"
+                },
+                {
+                    "source": "src/cpanel/views/apps.tt",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/views/apps.tt"
+                },
+                {
+                    "source": "src/cpanel/views/deploy.tt",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/views/deploy.tt"
+                },
+                {
+                    "source": "src/cpanel/views/settings.tt",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/views/settings.tt"
+                },
+                {
+                    "source": "src/cpanel/views/logs.tt",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/views/logs.tt"
+                }
+            ],
+            "assets": [
+                {
+                    "source": "src/cpanel/assets/css/frame.css",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/assets/css/frame.css"
+                },
+                {
+                    "source": "src/cpanel/assets/js/frame.js",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/assets/js/frame.js"
+                },
+                {
+                    "source": "src/cpanel/assets/js/deploy.js",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/assets/js/deploy.js"
+                },
+                {
+                    "source": "src/cpanel/assets/js/logs.js",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/assets/js/logs.js"
+                }
+            ],
+            "lib": [
+                {
+                    "source": "src/cpanel/lib/FrameCpanel.pm",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/lib/FrameCpanel.pm"
+                }
+            ],
+            "icons": [
+                {
+                    "source": "src/cpanel/plugin/icons/frame-icon.svg",
+                    "target": "/usr/local/cpanel/base/frontend/jupiter/frame/frame-icon.svg"
+                }
+            ],
+            "api": [
+                {
+                    "source": "src/api/cpanel/Frame.pm",
+                    "target": "/usr/local/cpanel/Cpanel/API/Frame.pm"
+                }
+            ]
+        },
+        "whm": {
+            "cgi": [
+                {
+                    "source": "src/whm/index.cgi",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/cgi/frame/index.cgi",
+                    "mode": "0755"
+                },
+                {
+                    "source": "src/whm/api.cgi",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/cgi/frame/api.cgi",
+                    "mode": "0755"
+                }
+            ],
+            "templates": [
+                {
+                    "source": "src/whm/templates/index.tmpl",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/cgi/frame/templates/index.tmpl"
+                },
+                {
+                    "source": "src/whm/templates/instances.tmpl",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/cgi/frame/templates/instances.tmpl"
+                },
+                {
+                    "source": "src/whm/templates/settings.tmpl",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/cgi/frame/templates/settings.tmpl"
+                },
+                {
+                    "source": "src/whm/templates/logs.tmpl",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/cgi/frame/templates/logs.tmpl"
+                }
+            ],
+            "assets": [
+                {
+                    "source": "src/whm/assets/css/frame.css",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/cgi/frame/assets/css/frame.css"
+                },
+                {
+                    "source": "src/whm/assets/js/frame.js",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/cgi/frame/assets/js/frame.js"
+                }
+            ],
+            "lib": [
+                {
+                    "source": "src/whm/lib/FrameWHM.pm",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/cgi/frame/lib/FrameWHM.pm"
+                }
+            ],
+            "api": [
+                {
+                    "source": "src/api/whm/Frame.pm",
+                    "target": "/usr/local/cpanel/Whostmgr/API/1/Frame.pm"
+                }
+            ],
+            "icons": [
+                {
+                    "source": "src/whm/plugin/icons/frame-icon.svg",
+                    "target": "/usr/local/cpanel/whostmgr/docroot/themes/x/icons/frame.svg"
+                }
+            ]
+        },
+        "system": {
+            "daemon": [
+                {
+                    "source": "target/release/frame-manager",
+                    "target": "/usr/local/bin/frame-manager",
+                    "mode": "0755"
+                }
+            ],
+            "systemd": [
+                {
+                    "source": "packaging/systemd/frame-manager.service",
+                    "target": "/etc/systemd/system/frame-manager.service"
+                }
+            ],
+            "config": [
+                {
+                    "source": "packaging/config/frame.conf",
+                    "target": "/etc/frame/frame.conf",
+                    "mode": "0644",
+                    "no_overwrite": true
+                },
+                {
+                    "source": "packaging/config/limits.conf",
+                    "target": "/etc/frame/limits.conf",
+                    "mode": "0644",
+                    "no_overwrite": true
+                }
+            ],
+            "hooks": [
+                {
+                    "source": "src/hooks/postwwwacct",
+                    "target": "/usr/local/cpanel/scripts/postwwwacct/frame",
+                    "mode": "0755"
+                },
+                {
+                    "source": "src/hooks/prekillacct",
+                    "target": "/usr/local/cpanel/scripts/prekillacct/frame",
+                    "mode": "0755"
+                },
+                {
+                    "source": "src/hooks/postacctremove",
+                    "target": "/usr/local/cpanel/scripts/postacctremove/frame",
+                    "mode": "0755"
+                }
+            ],
+            "directories": [
+                {
+                    "path": "/var/frame",
+                    "mode": "0755"
+                },
+                {
+                    "path": "/var/frame/instances",
+                    "mode": "0755"
+                },
+                {
+                    "path": "/var/log/frame",
+                    "mode": "0755"
+                },
+                {
+                    "path": "/etc/frame",
+                    "mode": "0755"
+                }
+            ]
+        }
+    },
+    "post_install": [
+        "systemctl daemon-reload",
+        "systemctl enable frame-manager",
+        "systemctl start frame-manager",
+        "/usr/local/cpanel/bin/rebuild_sprites"
+    ],
+    "pre_uninstall": [
+        "systemctl stop frame-manager",
+        "systemctl disable frame-manager"
+    ]
+}

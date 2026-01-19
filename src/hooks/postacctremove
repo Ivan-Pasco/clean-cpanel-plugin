@@ -1,0 +1,40 @@
+#!/bin/bash
+# Frame cPanel Plugin - Post Account Removal Hook
+# Called after a cPanel account is removed
+#
+# This script:
+# 1. Removes the user's Frame directory and all data
+# 2. Cleans up any orphaned resources
+
+set -e
+
+# Get username from arguments
+USERNAME="$1"
+
+if [ -z "$USERNAME" ]; then
+    echo "Error: Username not provided" >&2
+    exit 1
+fi
+
+# Configuration
+INSTANCE_DIR="/var/frame/instances/$USERNAME"
+
+# Check if user has a Frame instance
+if [ ! -d "$INSTANCE_DIR" ]; then
+    echo "No Frame instance found for $USERNAME, nothing to clean up"
+    exit 0
+fi
+
+echo "Removing Frame instance data for user: $USERNAME"
+
+# Remove the user's Frame directory
+rm -rf "$INSTANCE_DIR"
+
+# Verify removal
+if [ -d "$INSTANCE_DIR" ]; then
+    echo "Warning: Failed to remove directory $INSTANCE_DIR" >&2
+    exit 1
+fi
+
+echo "Frame instance removed successfully for $USERNAME"
+exit 0

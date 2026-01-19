@@ -1,0 +1,23 @@
+# Frame Applications ACL
+# This ACL controls access to the Frame Applications feature in cPanel
+
+# ACL Name
+name=frame-apps
+
+# Display name shown in Feature Manager
+display_name=Frame Applications
+
+# Description
+description=Allow users to deploy and manage Frame/Clean Language applications
+
+# Default state for new packages (1=enabled, 0=disabled)
+default=1
+
+# Category for grouping in Feature Manager
+category=Applications
+
+# Dependencies - user must have these features enabled
+requires=
+
+# Conflicts - cannot be enabled if these are enabled
+conflicts=

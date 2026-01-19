@@ -1,0 +1,40 @@
+[Unit]
+Description=Frame Service Manager for cPanel
+Documentation=https://docs.cleanlanguage.io/cpanel-plugin
+After=network.target cpanel.service
+Wants=cpanel.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/cpanel/3rdparty/bin/frame-manager
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+
+# Run as root (needed to manage user processes)
+User=root
+Group=root
+
+# Security hardening
+NoNewPrivileges=false
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/frame /etc/frame /var/log
+PrivateTmp=true
+
+# Resource limits
+LimitNOFILE=65535
+LimitNPROC=4096
+MemoryMax=256M
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=frame-manager
+
+# Environment
+Environment=RUST_LOG=info
+Environment=RUST_BACKTRACE=1
+
+[Install]
+WantedBy=multi-user.target

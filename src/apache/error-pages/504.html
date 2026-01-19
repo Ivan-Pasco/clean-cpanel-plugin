@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>504 - Gateway Timeout</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #5f1e1e 0%, #872d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            max-width: 500px;
+        }
+        .error-code {
+            font-size: 120px;
+            font-weight: 700;
+            opacity: 0.3;
+            line-height: 1;
+        }
+        h1 {
+            font-size: 28px;
+            margin: 20px 0 15px;
+        }
+        p {
+            font-size: 16px;
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .frame-logo {
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="frame-logo">
+            <svg width="60" height="60" viewBox="0 0 48 48" fill="currentColor">
+                <rect x="8" y="8" width="32" height="32" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+                <line x1="8" y1="18" x2="40" y2="18" stroke="currentColor" stroke-width="1.5"/>
+                <line x1="18" y1="8" x2="18" y2="40" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+        </div>
+        <div class="error-code">504</div>
+        <h1>Gateway Timeout</h1>
+        <p>The Frame application took too long to respond. This could indicate a long-running operation or the application may be overloaded.</p>
+        <a href="javascript:location.reload()" class="btn">Try Again</a>
+    </div>
+</body>
+</html>

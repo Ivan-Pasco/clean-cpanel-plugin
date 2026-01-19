@@ -1,0 +1,13 @@
+# cPanel Feature: Frame Applications
+# This file registers the Frame feature for package management
+
+# Feature identifier (must match ACL name)
+frame=1
+
+# Feature display information
+[frame]
+name=Frame Applications
+description=Deploy and manage Clean Language/Frame web applications
+category=Applications
+default=1
+is_public=1

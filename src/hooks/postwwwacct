@@ -1,0 +1,106 @@
+#!/bin/bash
+# Frame cPanel Plugin - Post Account Creation Hook
+# Called after a new cPanel account is created
+#
+# This script:
+# 1. Creates the user's Frame directory structure
+# 2. Initializes default configuration
+# 3. Sets proper ownership
+# 4. Allocates a port
+# 5. Optionally starts the instance if auto_start is enabled
+
+set -e
+
+# Get username from arguments
+USERNAME="$1"
+
+if [ -z "$USERNAME" ]; then
+    echo "Error: Username not provided" >&2
+    exit 1
+fi
+
+# Configuration
+FRAME_VAR="/var/frame"
+FRAME_MANAGER="/usr/local/cpanel/3rdparty/bin/frame-manager"
+INSTANCE_DIR="$FRAME_VAR/instances/$USERNAME"
+
+# Check if Frame service is enabled
+if [ -f "/etc/frame/frame.conf" ]; then
+    ENABLED=$(grep -E "^enabled\s*=" /etc/frame/frame.conf | cut -d= -f2 | tr -d ' ')
+    if [ "$ENABLED" = "false" ]; then
+        echo "Frame service is disabled, skipping instance creation for $USERNAME"
+        exit 0
+    fi
+fi
+
+echo "Creating Frame instance for user: $USERNAME"
+
+# Create directory structure
+mkdir -p "$INSTANCE_DIR/apps"
+mkdir -p "$INSTANCE_DIR/data"
+mkdir -p "$INSTANCE_DIR/logs"
+
+# Get default limits from configuration
+MEMORY_LIMIT=512
+MAX_APPS=5
+
+if [ -f "/etc/frame/limits.conf" ]; then
+    MEM=$(grep -E "^memory_limit\s*=" /etc/frame/limits.conf | cut -d= -f2 | tr -d ' ')
+    APPS=$(grep -E "^max_apps\s*=" /etc/frame/limits.conf | cut -d= -f2 | tr -d ' ')
+    [ -n "$MEM" ] && MEMORY_LIMIT=$MEM
+    [ -n "$APPS" ] && MAX_APPS=$APPS
+fi
+
+# Check for package-specific limits
+# cPanel stores package info in /var/cpanel/packages
+if [ -f "/var/cpanel/users/$USERNAME" ]; then
+    PACKAGE=$(grep "^PLAN=" "/var/cpanel/users/$USERNAME" | cut -d= -f2)
+    if [ -n "$PACKAGE" ] && [ -f "/etc/frame/packages/$PACKAGE.conf" ]; then
+        PKG_MEM=$(grep -E "^memory_limit\s*=" "/etc/frame/packages/$PACKAGE.conf" | cut -d= -f2 | tr -d ' ')
+        PKG_APPS=$(grep -E "^max_apps\s*=" "/etc/frame/packages/$PACKAGE.conf" | cut -d= -f2 | tr -d ' ')
+        [ -n "$PKG_MEM" ] && MEMORY_LIMIT=$PKG_MEM
+        [ -n "$PKG_APPS" ] && MAX_APPS=$PKG_APPS
+    fi
+fi
+
+# Create default instance configuration
+cat > "$INSTANCE_DIR/config.json" << EOF
+{
+    "auto_start": true,
+    "memory_limit": $MEMORY_LIMIT,
+    "max_apps": $MAX_APPS,
+    "env_vars": {},
+    "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+
+# Set ownership to the cPanel user
+chown -R "$USERNAME:$USERNAME" "$INSTANCE_DIR"
+
+# Set proper permissions
+chmod 750 "$INSTANCE_DIR"
+chmod 750 "$INSTANCE_DIR/apps"
+chmod 750 "$INSTANCE_DIR/data"
+chmod 750 "$INSTANCE_DIR/logs"
+chmod 640 "$INSTANCE_DIR/config.json"
+
+# Allocate a port for the user
+if [ -x "$FRAME_MANAGER" ]; then
+    $FRAME_MANAGER port allocate "$USERNAME" 2>/dev/null || true
+fi
+
+# Check if auto_start is enabled globally
+AUTO_START="true"
+if [ -f "/etc/frame/frame.conf" ]; then
+    AS=$(grep -E "^auto_start\s*=" /etc/frame/frame.conf | cut -d= -f2 | tr -d ' ')
+    [ -n "$AS" ] && AUTO_START=$AS
+fi
+
+# Start the instance if auto_start is enabled
+if [ "$AUTO_START" = "true" ] && [ -x "$FRAME_MANAGER" ]; then
+    echo "Starting Frame instance for $USERNAME..."
+    $FRAME_MANAGER user start "$USERNAME" 2>/dev/null || true
+fi
+
+echo "Frame instance created successfully for $USERNAME"
+exit 0
