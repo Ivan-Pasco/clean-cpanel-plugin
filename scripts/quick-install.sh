@@ -9,7 +9,7 @@
 set -e
 
 # Configuration
-GITHUB_REPO="cleanlanguage/frame-cpanel"
+GITHUB_REPO="Ivan-Pasco/clean-cpanel-plugin"
 INSTALL_DIR="/tmp/frame-cpanel-install"
 VERSION="${FRAME_VERSION:-latest}"
 
