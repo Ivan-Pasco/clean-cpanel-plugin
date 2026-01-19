@@ -27,36 +27,28 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          src/manager/target
+          target
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-
 
     - name: Check formatting
-      run: |
-        cd src/manager
-        cargo fmt -- --check
+      run: cargo fmt -- --check
 
     - name: Run clippy
-      run: |
-        cd src/manager
-        cargo clippy -- -D warnings
+      run: cargo clippy -- -D warnings
 
     - name: Build
-      run: |
-        cd src/manager
-        cargo build --release
+      run: cargo build --release -p frame-manager
 
     - name: Run tests
-      run: |
-        cd src/manager
-        cargo test
+      run: cargo test -p frame-manager
 
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
         name: frame-manager-linux-x64
-        path: src/manager/target/release/frame-manager
+        path: target/release/frame-manager
 
   lint-perl:
     runs-on: ubuntu-latest

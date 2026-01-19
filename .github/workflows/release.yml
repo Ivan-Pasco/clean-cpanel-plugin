@@ -28,8 +28,7 @@ jobs:
 
     - name: Build release binary (static)
       run: |
-        cd src/manager
-        cargo build --release --target x86_64-unknown-linux-musl
+        cargo build --release --target x86_64-unknown-linux-musl -p frame-manager
 
     - name: Get version
       id: version
@@ -41,7 +40,7 @@ jobs:
         mkdir -p dist/frame-cpanel-${VERSION}
 
         # Copy binary
-        cp src/manager/target/x86_64-unknown-linux-musl/release/frame-manager dist/frame-cpanel-${VERSION}/
+        cp target/x86_64-unknown-linux-musl/release/frame-manager dist/frame-cpanel-${VERSION}/
 
         # Copy source files
         cp -r src/whm dist/frame-cpanel-${VERSION}/
