@@ -280,6 +280,21 @@ install_cpanel() {
     mkdir -p "$CPANEL_BASE/base/frontend/jupiter/dynamicui"
     cp "$PROJECT_DIR/src/cpanel/plugin/dynamicui/frame.conf" "$CPANEL_BASE/base/frontend/jupiter/dynamicui/"
 
+    # Feature registration - enables Frame for all accounts by default
+    mkdir -p "/var/cpanel/features"
+    echo "frame=1" >> "/var/cpanel/features/default" 2>/dev/null || true
+
+    # Create cPanel AppConfig for the frame module
+    echo 'name=frame_cpanel
+service=cpanel
+url=frame/index.live.cgi
+acls=frame
+displayname=Frame Applications
+itemdesc=Deploy and manage Frame applications
+target=_self' > /var/cpanel/apps/frame_cpanel.conf
+    chmod 600 /var/cpanel/apps/frame_cpanel.conf
+    chown root:root /var/cpanel/apps/frame_cpanel.conf
+
     log_info "Installed cPanel interface"
 }
 
