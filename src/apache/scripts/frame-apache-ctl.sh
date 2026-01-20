@@ -45,10 +45,12 @@ init() {
         log_info "Installed main configuration: $FRAME_MAIN_CONF"
     fi
 
-    # Copy error pages
-    if [ -d "$ERROR_PAGE_SOURCE" ]; then
-        cp "$ERROR_PAGE_SOURCE"/*.html "$FRAME_ERROR_PAGES/"
+    # Copy error pages (if source exists)
+    if [ -d "$ERROR_PAGE_SOURCE" ] && ls "$ERROR_PAGE_SOURCE"/*.html &>/dev/null; then
+        cp "$ERROR_PAGE_SOURCE"/*.html "$FRAME_ERROR_PAGES/" 2>/dev/null || true
         log_info "Installed error pages to: $FRAME_ERROR_PAGES"
+    else
+        log_warn "Error pages source not found, skipping (installed by main installer)"
     fi
 
     # Create include in Apache configuration if not exists

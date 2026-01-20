@@ -137,27 +137,27 @@ install_daemon() {
 
     # Check multiple locations for the binary
     # 1. Pre-built binary in project root (from GitHub release)
-    # 2. Built binary in target/release
-    # 3. Built binary in src/manager/target/release
+    # 2. Built binary in target/release (workspace build)
+    # 3. Built binary in src/manager/target/release (direct build)
 
     if [ -f "$PROJECT_DIR/frame-manager" ]; then
         binary="$PROJECT_DIR/frame-manager"
         log_info "Using pre-built binary from release package"
     elif [ -f "$PROJECT_DIR/target/release/frame-manager" ]; then
         binary="$PROJECT_DIR/target/release/frame-manager"
+        log_info "Using binary from workspace build"
     elif [ -f "$PROJECT_DIR/src/manager/target/release/frame-manager" ]; then
         binary="$PROJECT_DIR/src/manager/target/release/frame-manager"
+        log_info "Using binary from direct build"
     fi
 
     if [ -z "$binary" ] || [ ! -f "$binary" ]; then
         # Try to build if cargo is available
         if command -v cargo &>/dev/null; then
             log_warn "Binary not found, attempting to build..."
-            if [ -d "$PROJECT_DIR/src/manager" ]; then
-                cd "$PROJECT_DIR/src/manager"
-                cargo build --release
-                binary="$PROJECT_DIR/src/manager/target/release/frame-manager"
-            fi
+            cd "$PROJECT_DIR"
+            cargo build --release -p frame-manager
+            binary="$PROJECT_DIR/target/release/frame-manager"
         else
             log_error "frame-manager binary not found and cargo is not available"
             log_error "Please download a pre-built release from GitHub"
@@ -293,8 +293,13 @@ install_apache() {
     # Templates
     cp "$PROJECT_DIR/src/apache/templates/"*.tmpl "$WHM_DOCROOT/cgi/frame/templates/apache/"
 
-    # Error pages
-    cp "$PROJECT_DIR/src/apache/error-pages/"*.html "/var/www/frame-error/"
+    # Error pages - install to both locations
+    mkdir -p "/var/www/frame-error"
+    mkdir -p "$WHM_DOCROOT/cgi/frame/error-pages"
+    if ls "$PROJECT_DIR/src/apache/error-pages/"*.html &>/dev/null; then
+        cp "$PROJECT_DIR/src/apache/error-pages/"*.html "/var/www/frame-error/"
+        cp "$PROJECT_DIR/src/apache/error-pages/"*.html "$WHM_DOCROOT/cgi/frame/error-pages/"
+    fi
 
     # Scripts
     cp "$PROJECT_DIR/src/apache/scripts/generate-vhost.pl" "$WHM_DOCROOT/cgi/frame/"
@@ -317,9 +322,21 @@ register_cpanel() {
         "$CPANEL_BASE/bin/rebuild_sprites" || true
     fi
 
-    # Register feature
-    if [ -x "$CPANEL_BASE/bin/register_cpanelplugin" ]; then
-        "$CPANEL_BASE/bin/register_cpanelplugin" "$PROJECT_DIR/src/cpanel/plugin/plugin.json" || true
+    # Install WHM AppConfig
+    log_info "Installing WHM AppConfig..."
+    cp "$PROJECT_DIR/src/whm/plugin/frame_whm.conf" /var/cpanel/apps/frame_whm.conf
+    chmod 600 /var/cpanel/apps/frame_whm.conf
+    chown root:root /var/cpanel/apps/frame_whm.conf
+
+    # Register with AppConfig (if available)
+    if [ -x "$CPANEL_BASE/bin/register_appconfig" ]; then
+        "$CPANEL_BASE/bin/register_appconfig" /var/cpanel/apps/frame_whm.conf 2>/dev/null || true
+    fi
+
+    # Enable unregistered apps as fallback (for older cPanel versions)
+    if ! grep -q "permit_unregistered_apps_as_root=1" /var/cpanel/cpanel.config 2>/dev/null; then
+        log_info "Enabling unregistered apps for root..."
+        echo "permit_unregistered_apps_as_root=1" >> /var/cpanel/cpanel.config
     fi
 
     log_info "Registered with cPanel"
@@ -336,6 +353,12 @@ start_services() {
     if command -v apachectl &>/dev/null; then
         apachectl graceful || true
         log_info "Apache reloaded"
+    fi
+
+    # Restart cPanel services to pick up plugin
+    if [ -x "/scripts/restartsrv_cpsrvd" ]; then
+        /scripts/restartsrv_cpsrvd || true
+        log_info "cPanel services restarted"
     fi
 }
 
