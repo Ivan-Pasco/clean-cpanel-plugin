@@ -284,14 +284,8 @@ install_cpanel() {
     mkdir -p "/var/cpanel/features"
     echo "frame=1" >> "/var/cpanel/features/default" 2>/dev/null || true
 
-    # Create cPanel AppConfig for the frame module
-    echo 'name=frame_cpanel
-service=cpanel
-url=frame/index.live.cgi
-acls=frame
-displayname=Frame Applications
-itemdesc=Deploy and manage Frame applications
-target=_self' > /var/cpanel/apps/frame_cpanel.conf
+    # Install cPanel AppConfig for the frame module
+    cp "$PROJECT_DIR/src/cpanel/plugin/frame_cpanel.conf" /var/cpanel/apps/frame_cpanel.conf
     chmod 600 /var/cpanel/apps/frame_cpanel.conf
     chown root:root /var/cpanel/apps/frame_cpanel.conf
 
