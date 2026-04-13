@@ -1,7 +1,7 @@
 //! Health Check Implementations
 
 use chrono::{DateTime, Utc};
-use nix::sys::signal::{kill, Signal};
+use nix::sys::signal::kill;
 use nix::unistd::Pid;
 use serde::{Deserialize, Serialize};
 use std::net::TcpStream;
@@ -166,6 +166,7 @@ impl HealthCheck {
         }
     }
 
+    #[allow(unused_variables)]
     fn check_memory(&self, pid: u32, limit_bytes: u64) -> (String, bool, String) {
         #[cfg(target_os = "linux")]
         {

@@ -121,7 +121,7 @@ async fn main() -> Result<()> {
         _ => Level::INFO,
     };
 
-    let subscriber = FmtSubscriber::builder()
+    let _subscriber = FmtSubscriber::builder()
         .with_max_level(log_level)
         .with_target(true)
         .with_thread_ids(true)

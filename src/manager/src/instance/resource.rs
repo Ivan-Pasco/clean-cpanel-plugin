@@ -75,6 +75,7 @@ pub struct CgroupController {
 }
 
 #[cfg(target_os = "linux")]
+#[allow(dead_code)]
 impl CgroupController {
     /// Create a new cgroup for a user
     pub fn create_for_user(username: &str) -> std::io::Result<Self> {
@@ -129,9 +130,11 @@ impl CgroupController {
 
 /// Placeholder for non-Linux systems
 #[cfg(not(target_os = "linux"))]
+#[allow(dead_code)]
 pub struct CgroupController;
 
 #[cfg(not(target_os = "linux"))]
+#[allow(dead_code)]
 impl CgroupController {
     pub fn create_for_user(_username: &str) -> std::io::Result<Self> {
         Ok(Self)

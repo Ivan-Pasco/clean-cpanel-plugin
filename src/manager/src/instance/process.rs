@@ -111,6 +111,7 @@ impl ProcessManager {
     }
 
     /// Get resource usage for a process
+    #[allow(unused_variables)]
     pub fn get_resource_usage(&self, pid: u32) -> Result<(u64, f32)> {
         // Read from /proc on Linux
         #[cfg(target_os = "linux")]

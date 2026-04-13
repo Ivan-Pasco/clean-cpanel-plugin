@@ -1,9 +1,8 @@
 //! API Route Definitions
 
 use axum::{
-    extract::{Path, State},
     routing::{get, post, put},
-    Json, Router,
+    Router,
 };
 use std::sync::Arc;
 

@@ -13,7 +13,7 @@ use crate::api::ApiServer;
 use crate::config::{Config, PackageConfig};
 use crate::events::{Event, EventEmitter};
 use crate::health::HealthMonitor;
-use crate::instance::{Instance, InstanceManager, ResourceLimits};
+use crate::instance::{InstanceManager, ResourceLimits};
 use crate::metrics::MetricsCollector;
 use crate::port::PortAllocator;
 
@@ -132,6 +132,7 @@ impl FrameManager {
         Ok(())
     }
 
+    #[allow(dead_code)]
     /// Clone the Arc for passing to API server
     fn clone(&self) -> Arc<Self> {
         Arc::new(Self {
