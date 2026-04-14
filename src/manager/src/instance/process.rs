@@ -140,7 +140,7 @@ impl ProcessManager {
             // This is simplified - real implementation would track over time
             let cpu_percent = (total_time / 100.0).min(100.0);
 
-            return Ok((memory_bytes, cpu_percent));
+            Ok((memory_bytes, cpu_percent))
         }
 
         // Fallback for non-Linux
