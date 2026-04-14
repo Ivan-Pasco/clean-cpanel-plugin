@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use crate::api::handlers::{InstanceStatusResponse, ServiceStatus, SettingsUpdate, PackageUpdate};
+use crate::api::handlers::{InstanceStatusResponse, PackageUpdate, ServiceStatus, SettingsUpdate};
 use crate::api::ApiServer;
 use crate::config::{Config, PackageConfig};
 use crate::events::{Event, EventEmitter};
@@ -195,7 +195,11 @@ impl FrameManager {
                 let content = tokio::fs::read_to_string(&config_path).await?;
                 let config: serde_json::Value = serde_json::from_str(&content)?;
 
-                if config.get("auto_start").and_then(|v| v.as_bool()).unwrap_or(true) {
+                if config
+                    .get("auto_start")
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(true)
+                {
                     if let Err(e) = self.start_instance(&instance.username).await {
                         tracing::error!(
                             "Failed to auto-start instance for {}: {}",
@@ -429,9 +433,7 @@ impl FrameManager {
         // Save to file
         let content = format!(
             "[service]\nenabled = {}\nauto_start = {}\nhealth_check_interval = {}\n",
-            config.service.enabled,
-            config.service.auto_start,
-            config.service.health_check_interval
+            config.service.enabled, config.service.auto_start, config.service.health_check_interval
         );
 
         tokio::fs::write(&self.config_path, content).await?;

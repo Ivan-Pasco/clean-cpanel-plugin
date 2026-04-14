@@ -40,11 +40,7 @@ impl HookExecutor {
         // Build environment variables from event
         let env_vars = self.event_to_env(event);
 
-        match Command::new(&hook_path)
-            .envs(env_vars)
-            .output()
-            .await
-        {
+        match Command::new(&hook_path).envs(env_vars).output().await {
             Ok(output) => {
                 if !output.status.success() {
                     tracing::warn!(
@@ -68,7 +64,11 @@ impl HookExecutor {
         let mut env = Vec::new();
 
         match event {
-            Event::InstanceStarted { username, port, apps } => {
+            Event::InstanceStarted {
+                username,
+                port,
+                apps,
+            } => {
                 env.push(("FRAME_USERNAME".to_string(), username.clone()));
                 env.push(("FRAME_PORT".to_string(), port.to_string()));
                 env.push(("FRAME_APPS".to_string(), apps.join(",")));

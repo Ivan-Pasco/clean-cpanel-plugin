@@ -116,8 +116,7 @@ impl CgroupController {
         let procs = self.cgroup_path.join("cgroup.procs");
         if procs.exists() {
             let content = std::fs::read_to_string(&procs)?;
-            let parent_procs =
-                self.cgroup_path.parent().unwrap().join("cgroup.procs");
+            let parent_procs = self.cgroup_path.parent().unwrap().join("cgroup.procs");
             for line in content.lines() {
                 let _ = std::fs::write(&parent_procs, line);
             }

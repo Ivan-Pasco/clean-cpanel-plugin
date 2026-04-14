@@ -135,7 +135,10 @@ pub async fn start_instance(
     match manager.start_instance(&username).await {
         Ok(_) => (
             StatusCode::OK,
-            Json(ApiResponse::success(format!("Instance started for {}", username))),
+            Json(ApiResponse::success(format!(
+                "Instance started for {}",
+                username
+            ))),
         ),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -156,7 +159,10 @@ pub async fn stop_instance(
     match manager.stop_instance(&username).await {
         Ok(_) => (
             StatusCode::OK,
-            Json(ApiResponse::success(format!("Instance stopped for {}", username))),
+            Json(ApiResponse::success(format!(
+                "Instance stopped for {}",
+                username
+            ))),
         ),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -177,7 +183,10 @@ pub async fn restart_instance(
     match manager.restart_instance(&username).await {
         Ok(_) => (
             StatusCode::OK,
-            Json(ApiResponse::success(format!("Instance restarted for {}", username))),
+            Json(ApiResponse::success(format!(
+                "Instance restarted for {}",
+                username
+            ))),
         ),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,

@@ -64,9 +64,8 @@ impl PortRegistry {
     pub fn save(&self) -> Result<()> {
         // Ensure parent directory exists
         if let Some(parent) = self.path.parent() {
-            fs::create_dir_all(parent).with_context(|| {
-                format!("Failed to create directory: {}", parent.display())
-            })?;
+            fs::create_dir_all(parent)
+                .with_context(|| format!("Failed to create directory: {}", parent.display()))?;
         }
 
         let content = serde_json::to_string_pretty(self)

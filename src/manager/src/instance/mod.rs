@@ -218,7 +218,12 @@ impl InstanceManager {
         instance.status = InstanceStatus::Running;
         instance.started_at = Some(Utc::now());
 
-        tracing::info!("Started instance for user {} on port {} (PID: {})", username, port, pid);
+        tracing::info!(
+            "Started instance for user {} on port {} (PID: {})",
+            username,
+            port,
+            pid
+        );
 
         Ok(())
     }

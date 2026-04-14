@@ -66,7 +66,10 @@ impl ProcessManager {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
 
         if !self.is_running(pid) {
-            anyhow::bail!("Frame server process exited immediately for user {}", username);
+            anyhow::bail!(
+                "Frame server process exited immediately for user {}",
+                username
+            );
         }
 
         Ok(pid)

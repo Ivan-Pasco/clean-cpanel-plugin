@@ -66,11 +66,7 @@ impl MetricsCollector {
     pub fn set_gauge(&mut self, name: &str, value: f64, labels: HashMap<String, String>) {
         if let Some(metric) = self.metrics.get_mut(name) {
             // Find existing value with same labels or add new
-            if let Some(existing) = metric
-                .values
-                .iter_mut()
-                .find(|v| v.labels == labels)
-            {
+            if let Some(existing) = metric.values.iter_mut().find(|v| v.labels == labels) {
                 existing.value = value;
             } else {
                 metric.values.push(MetricValue { value, labels });
@@ -86,11 +82,7 @@ impl MetricsCollector {
     /// Add to a counter
     pub fn add_counter(&mut self, name: &str, value: f64, labels: HashMap<String, String>) {
         if let Some(metric) = self.metrics.get_mut(name) {
-            if let Some(existing) = metric
-                .values
-                .iter_mut()
-                .find(|v| v.labels == labels)
-            {
+            if let Some(existing) = metric.values.iter_mut().find(|v| v.labels == labels) {
                 existing.value += value;
             } else {
                 metric.values.push(MetricValue { value, labels });

@@ -132,8 +132,13 @@ impl HealthMonitor {
                                 username,
                                 status.consecutive_failures
                             );
-                            if let Err(e) = instance_manager.restart(&username, instance.port).await {
-                                tracing::error!("Failed to restart instance for {}: {}", username, e);
+                            if let Err(e) = instance_manager.restart(&username, instance.port).await
+                            {
+                                tracing::error!(
+                                    "Failed to restart instance for {}: {}",
+                                    username,
+                                    e
+                                );
                             }
                             status.consecutive_failures = 0;
                         }

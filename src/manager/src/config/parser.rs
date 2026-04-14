@@ -159,19 +159,51 @@ impl ConfigParser {
 
     fn parse_package_limits(&self, ini: &Ini) -> PackageLimits {
         PackageLimits {
-            memory_limit: ini.getuint("limits", "memory_limit").ok().flatten().unwrap_or(512),
-            cpu_limit: ini.getuint("limits", "cpu_limit").ok().flatten().unwrap_or(25) as u8,
-            max_apps: ini.getuint("limits", "max_apps").ok().flatten().unwrap_or(5) as u32,
-            disk_quota: ini.getuint("limits", "disk_quota").ok().flatten().unwrap_or(1024),
+            memory_limit: ini
+                .getuint("limits", "memory_limit")
+                .ok()
+                .flatten()
+                .unwrap_or(512),
+            cpu_limit: ini
+                .getuint("limits", "cpu_limit")
+                .ok()
+                .flatten()
+                .unwrap_or(25) as u8,
+            max_apps: ini
+                .getuint("limits", "max_apps")
+                .ok()
+                .flatten()
+                .unwrap_or(5) as u32,
+            disk_quota: ini
+                .getuint("limits", "disk_quota")
+                .ok()
+                .flatten()
+                .unwrap_or(1024),
         }
     }
 
     fn parse_package_features(&self, ini: &Ini) -> PackageFeatures {
         PackageFeatures {
-            fs_access: ini.getbool("features", "fs_access").ok().flatten().unwrap_or(false),
-            sys_access: ini.getbool("features", "sys_access").ok().flatten().unwrap_or(false),
-            custom_domains: ini.getbool("features", "custom_domains").ok().flatten().unwrap_or(true),
-            ssl_support: ini.getbool("features", "ssl_support").ok().flatten().unwrap_or(true),
+            fs_access: ini
+                .getbool("features", "fs_access")
+                .ok()
+                .flatten()
+                .unwrap_or(false),
+            sys_access: ini
+                .getbool("features", "sys_access")
+                .ok()
+                .flatten()
+                .unwrap_or(false),
+            custom_domains: ini
+                .getbool("features", "custom_domains")
+                .ok()
+                .flatten()
+                .unwrap_or(true),
+            ssl_support: ini
+                .getbool("features", "ssl_support")
+                .ok()
+                .flatten()
+                .unwrap_or(true),
         }
     }
 }

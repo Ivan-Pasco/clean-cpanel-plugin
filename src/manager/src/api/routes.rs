@@ -24,7 +24,10 @@ pub fn create_routes(manager: Arc<FrameManager>) -> Router {
         .route("/frame/instances/:username/stop", post(stop_instance))
         .route("/frame/instances/:username/restart", post(restart_instance))
         .route("/frame/instances/:username/logs", get(get_instance_logs))
-        .route("/frame/instances/:username/status", get(get_instance_status))
+        .route(
+            "/frame/instances/:username/status",
+            get(get_instance_status),
+        )
         // Settings endpoints
         .route("/frame/settings", get(get_settings).put(update_settings))
         // Package endpoints

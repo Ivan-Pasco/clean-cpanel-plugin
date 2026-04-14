@@ -91,10 +91,7 @@ impl HealthCheck {
 
     fn check_port(&self, port: u16) -> (String, bool, String) {
         let addr = format!("127.0.0.1:{}", port);
-        match TcpStream::connect_timeout(
-            &addr.parse().unwrap(),
-            Duration::from_secs(2),
-        ) {
+        match TcpStream::connect_timeout(&addr.parse().unwrap(), Duration::from_secs(2)) {
             Ok(_) => (
                 "port".to_string(),
                 true,
@@ -113,10 +110,7 @@ impl HealthCheck {
 
         // Simple HTTP check using TCP
         let addr = format!("127.0.0.1:{}", port);
-        match TcpStream::connect_timeout(
-            &addr.parse().unwrap(),
-            Duration::from_secs(5),
-        ) {
+        match TcpStream::connect_timeout(&addr.parse().unwrap(), Duration::from_secs(5)) {
             Ok(mut stream) => {
                 use std::io::{Read, Write};
 
