@@ -11,7 +11,7 @@ use std::path::Path;
 pub use parser::ConfigParser;
 
 /// Main configuration structure
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Config {
     pub service: ServiceConfig,
     pub defaults: DefaultsConfig,
@@ -81,18 +81,6 @@ pub struct ProxyConfig {
     pub timeout: u64,
     /// Enable WebSocket proxying
     pub websocket: bool,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            service: ServiceConfig::default(),
-            defaults: DefaultsConfig::default(),
-            logging: LoggingConfig::default(),
-            security: SecurityConfig::default(),
-            proxy: ProxyConfig::default(),
-        }
-    }
 }
 
 impl Default for ServiceConfig {
